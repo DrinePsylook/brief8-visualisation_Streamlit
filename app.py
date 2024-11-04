@@ -21,6 +21,13 @@ def filter_data(data, col, order):
         tbl_filter = pd.DataFrame(data).sort_values(by=col, ascending=asc)
     return tbl_filter
 
+def category(tbl, col, cat):
+    if cat : 
+        new_data = tbl[tbl[col].isin(cat)]
+    else:
+        new_data = tbl
+    return new_data
+
 
 data_load_state = st.text('Loading data...')
 
@@ -32,5 +39,15 @@ data_load_state.text('Loading data...done!')
 data = filter_data(data, option, ordre)
 
 category_model = data['model'].astype('category')
+
+select_category = st.multiselect(
+    "Choisissez les marques des voitures :",
+    category_model,
+    default = None,
+    placeholder = "Marques de voiture"
+)
+st.write(select_category)
+
+data = category(data, 'model', select_category)
 
 st.dataframe(data=data, on_select="rerun", selection_mode="multi-row")
