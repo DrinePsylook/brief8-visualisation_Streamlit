@@ -28,8 +28,24 @@ def category(tbl, col, cat):
     return new_data
 
 def slider_price(tbl, col, values) :
-    if values : 
+    if values and len(values) == 2: 
         new_data = tbl[tbl[col].between(values[0], values[1])]
     else:
         new_data = tbl
     return new_data
+
+def advanced_filter(data, option):
+    for col_name, col_type in data.dtypes.items() :
+        if col_name == option:
+            cat_data = data[col_name].astype('category').unique()
+            if col_type == 'object':
+                select_data_col = st.sidebar.multiselect(f"Choisissez un filtre avancé pour {col_name} : ", 
+                                                        cat_data,
+                                                        default = None,
+                                                        placeholder = "Quel truc")
+                return select_data_col
+            elif col_type == 'int64' or col_type == 'float64' :
+                min_nb = int(min(data[col_name]))
+                max_nb = int(max(data[col_name]))
+                values_data_col = st.sidebar.slider(f"Selectionnez une tranche pour {col_name} :", min_nb, max_nb, (min_nb, max_nb))
+                return values_data_col
