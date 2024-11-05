@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-from utils import load_data, filter_data, category, slider_price, advanced_filter
+from utils import load_data, filter_data, category, slider_price, advanced_filter, convert_xlsx
 
 st.set_page_config(page_title="Visualisation avec Streamlit",
     page_icon="🧊",
@@ -30,7 +30,7 @@ if option :
     data = filter_data(data, option, ordre)
     #appel de la fonction de filtre avancé
     filterPlus = advanced_filter(data, option)
-    # print(filterPlus)
+    #print(filterPlus)
     if filterPlus:
         if isinstance(filterPlus, list) :
             data = category(data, option, filterPlus)
@@ -58,12 +58,24 @@ if not data.empty :
     min_price = int(min(data['sellingprice']))
     max_price = int(max(data['sellingprice']))
 
-    # affichage du slider
-    values = st.sidebar.slider("Selectionnez une tranche de prix :", min_price, max_price, (min_price, max_price))
+    if min_price == max_price:
+        st.sidebar.write(f"Le prix de vente est fixe : {min_price}")
+        values = (min_price, max_price)  # Utilisation de la valeur unique pour le filtre
+    else:
+        # affichage du slider
+        values = st.sidebar.slider("Selectionnez une tranche de prix :", min_price, max_price, (min_price, max_price))
 
     data = slider_price(data, 'sellingprice', values)
 
 
 
 st.dataframe(data=data, use_container_width= True, on_select="rerun")
-print("longeur tableau : ", len(data))
+
+#conversion du data filtré
+xlsx_file = convert_xlsx(data)
+
+#bouton permettant le téléchargement au format excel
+st.download_button("Download xlsx", 
+          data=xlsx_file,
+          file_name=f"car_prices-{option}.xlsx",
+          mime="application/vnd.ms-excel")

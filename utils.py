@@ -1,8 +1,10 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import io
 
 DATA_CSV = ('car_prices_clean.csv')
+buffer = io.BytesIO()
 
 def load_data(nrows) :
     data = pd.read_csv(DATA_CSV, nrows=nrows)
@@ -49,3 +51,12 @@ def advanced_filter(data, option):
                 max_nb = int(max(data[col_name]))
                 values_data_col = st.sidebar.slider(f"Selectionnez une tranche pour {col_name} :", min_nb, max_nb, (min_nb, max_nb))
                 return values_data_col
+            
+def convert_xlsx(data):
+    buffer = io.BytesIO()
+    writer = pd.ExcelWriter(buffer, engine="xlsxwriter")
+    data.to_excel(writer, index=False, sheet_name="sheet1")
+    writer.close()
+    data_bytes = buffer.getvalue() 
+    return data_bytes
+ 
