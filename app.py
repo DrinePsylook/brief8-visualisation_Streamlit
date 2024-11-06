@@ -79,22 +79,37 @@ select_col_agg = st.sidebar.multiselect(
     placeholder = "Les colonnes à aggréger"
 )
 
-if st.sidebar.button("Somme"):
+
+col1, col2 = st.sidebar.columns(2)
+with col1:
+    button_sum = st.button("Somme")
+    button_min = st.button("Minimum")
+
+with col2:
+    button_mean = st.button("Moyenne")
+    button_max = st.button("Maximum")
+
+#création du bouton sum
+if button_sum:
     data_sum = agg_sum(data, option, select_col_agg)
-    data_sum
+    st.write(data_sum)
 
-if st.sidebar.button("Moyenne"):
+#création du bouton mean
+if button_mean:
     data_mean = agg_mean(data, option, select_col_agg)
-    data_mean
+    st.write(data_mean)
 
-if st.sidebar.button("Minimum"):
+#création du bouton min
+if button_min:
     data_min = agg_min(data, option, select_col_agg)
-    data_min
+    st.write(data_min)
 
-if st.sidebar.button("Maximum"):
+#création du bouton max
+if button_max:
     data_max = agg_max(data, option, select_col_agg)
-    data_max
+    st.write(data_max)
 
+#création du bouton reset
 if st.sidebar.button("Reset"):
     data = load_data(100)
 
