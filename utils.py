@@ -52,6 +52,13 @@ def advanced_filter(data, option):
                 values_data_col = st.sidebar.slider(f"Selectionnez une tranche pour {col_name} :", min_nb, max_nb, (min_nb, max_nb))
                 return values_data_col
             
+def col_numeric(data):
+    col_num=[]
+    for col_name, col_type in data.dtypes.items() :
+        if col_type == 'int64' or col_type == 'float64' :
+            col_num.append(col_name)
+    return col_num
+            
 def convert_xlsx(data):
     buffer = io.BytesIO()
     writer = pd.ExcelWriter(buffer, engine="xlsxwriter")
@@ -60,3 +67,18 @@ def convert_xlsx(data):
     data_bytes = buffer.getvalue() 
     return data_bytes
  
+def agg_sum(data, col1, col2):
+    sum_data = data.groupby(col1)[col2].sum()
+    return sum_data
+
+def agg_mean(data, col1, col2):
+    mean_data = data.groupby(col1)[col2].mean()
+    return mean_data
+
+def agg_min(data, col1, col2):
+    min_data = data.groupby(col1)[col2].min()
+    return min_data
+
+def agg_max(data, col1, col2):
+    max_data = data.groupby(col1)[col2].max()
+    return max_data

@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-from utils import load_data, filter_data, category, slider_price, advanced_filter, convert_xlsx
+from utils import load_data, filter_data, category, slider_price, advanced_filter, col_numeric, convert_xlsx, agg_sum,agg_mean, agg_min, agg_max
 
 st.set_page_config(page_title="Visualisation avec Streamlit",
     page_icon="🧊",
@@ -67,6 +67,36 @@ if not data.empty :
 
     data = slider_price(data, 'sellingprice', values)
 
+st.sidebar.divider()
+
+
+col_num = col_numeric(data)
+
+select_col_agg = st.sidebar.multiselect(
+    "Choisissez les colonnes à aggréger :",
+    col_num,
+    default = None,
+    placeholder = "Les colonnes à aggréger"
+)
+
+if st.sidebar.button("Somme"):
+    data_sum = agg_sum(data, option, select_col_agg)
+    data_sum
+
+if st.sidebar.button("Moyenne"):
+    data_mean = agg_mean(data, option, select_col_agg)
+    data_mean
+
+if st.sidebar.button("Minimum"):
+    data_min = agg_min(data, option, select_col_agg)
+    data_min
+
+if st.sidebar.button("Maximum"):
+    data_max = agg_max(data, option, select_col_agg)
+    data_max
+
+if st.sidebar.button("Reset"):
+    data = load_data(100)
 
 
 st.dataframe(data=data, use_container_width= True, on_select="rerun")
