@@ -3,14 +3,13 @@ import pandas as pd
 import numpy as np
 from io import BytesIO
 
-# Charger les données
-def load_data(nrows):
+def load_data(nrows):           # Charger les données
     data = pd.read_csv("car_prices_clean.csv", nrows=nrows)
     lowercase = lambda x: str(x).lower()
     data.rename(lowercase, axis='columns', inplace=True)
     return data
-# Trier les données
-def data_tri(table,colonne,sort_order):
+
+def data_tri(table,colonne,sort_order):    # Trier les données
     if colonne:
         
         if sort_order == 'Ascendant':
@@ -19,28 +18,28 @@ def data_tri(table,colonne,sort_order):
             data_sorted = pd.DataFrame(table).sort_values(by=colonne, ascending=False)
     
     return data_sorted
-# Filtrage par modèle
-def catogor(data,colonne,cat):
+
+def catogor(data,colonne,cat):    # Filtrage par modèle
     
     if cat:
         df2=data[data[colonne].isin(cat)]
     else:
         df2=data 
     return df2
-# Filtrage pour les colonnes numériques
-def filter_numeric_column(data, column, min_value, max_value):
+
+def filter_numeric_column(data, column, min_value, max_value):  # Filtrage pour les colonnes numériques
     return data[data[column].between(min_value, max_value)]
-# Filtrage pour les colonnes booléennes
-def filter_boolean_column(data, column, selected_value):
+
+def filter_boolean_column(data, column, selected_value):        # Filtrage pour les colonnes booléennes
     return data[data[column] == selected_value]
-# Filtrage pour les colonnes catégorielles
-def filter_categorical_column(data, column, selected_values):
+
+def filter_categorical_column(data, column, selected_values):   # Filtrage pour les colonnes catégorielles
     return data[data[column].isin(selected_values)]
-# Filtrage automatique  
-def automatic_filtering(data):
+
+def automatic_filtering(data):      # Filtrage automatique  
     filtered_data = data.copy() 
-     #fonction du type de chaque colonne
-    for column in data.columns:
+    
+    for column in data.columns:      #fonction du type de chaque colonne
         column_type = data[column].dtype
 
         if np.issubdtype(column_type, np.number):
@@ -62,8 +61,8 @@ def automatic_filtering(data):
             filtered_data = filter_categorical_column(filtered_data, column, selected_values)
 
     return filtered_data
- # Fonction pour télécharger  
-def download_excel(data):
+ 
+def download_excel(data):     # Fonction pour télécharger  
     excel_file = BytesIO()   # Créer un fichier Excel en mémoire avec BytesIO
 
     with pd.ExcelWriter(excel_file, engine='xlsxwriter') as writer:  # Créer un ExcelWriter et écrire les données dans un fichier Excel en mémoire
@@ -79,10 +78,50 @@ def download_excel(data):
 
     excel_file.seek(0) # Revenir au début du fichier Excel en mémoire
 
+def group_data(data, group_by_col, agg_function):
+    if group_by_col and agg_function:
+                                   # Vérifier que la colonne de données pour l'agrégation est de type numérique
+        numeric_columns = data.select_dtypes(include=np.number).columns.tolist()
+    return data
 
+
+def collect_user_input(data):
+    group_column = st.selectbox("Sélectionner la colonne de regroupement", data.columns)  # Choisir une colonne de regroupement
+
+    numeric_columns = data.select_dtypes(include=np.number).columns.tolist()# Sélectionner les colonnes d'agrégation numériques
+    agg_columns = st.multiselect("Sélectionner les colonnes d'agrégation", numeric_columns)                                  
+    agg_functions = {}   # Sélectionner les fonctions d'agrégation pour chaque colonne
+    
+    for col in agg_columns:
+        functions = st.multiselect(f"Choisir les fonctions d'agrégation pour {col}", ['mean', 'sum', 'count', 'min', 'max'])
+        agg_functions[col] = functions
+
+    return group_column, agg_columns, agg_functions
+
+def apply_groupby(data, group_column, agg_columns, agg_functions):
+    # Regroupement par la colonne choisie
+    grouped_data = data.groupby(group_column)
+    
+    # Appliquer les agrégations spécifiées
+    
+
+def display_and_download(aggregated_data):
+   
+    st.write("donner groupées et agrégées :")
+    st.dataframe(aggregated_data)         # Télécharger les résultats agrégés en Excel
+    if st.button("Télécharger les données agrégées"):
+        download_excel(aggregated_data)
+
+    agg_dict = {}
+    for col in agg_columns:
+        agg_dict[col] = agg_functions[col]
+    
+    aggregated_data = grouped_data.agg(agg_dict).reset_index()
+    return aggregated_data
 
 data_load_state = st.text('Loading data...')            # Charger les données
 data = load_data(100)
+
 
 data_load_state.text('Loading data...done!')
 
@@ -140,7 +179,31 @@ st.write("Voici les données filtrées :")  # Afficher les données filtrées
 st.dataframe(filtered_data)
 if st.button("telecharger le excel"):    # Ajouter un bouton pour télécharger le fichier Excel
 
-    download_excel(filtered_data)
+  download_excel(filtered_data)
+
+                                    # Charger les données
+data = load_data(100)
+
+                                    
+st.title("Analyse des Données des Voitures")   # Titre de l'application
+
+                                        # Sélection de la colonne pour le groupement
+group_column = st.selectbox("Choisir une colonne pour le groupement", data.columns)
+
+                                      # Sélection de la fonction d'agrégation
+aggregation_function = st.selectbox("Choisir une fonction d'agrégation", 
+                                   ['mean', 'sum', 'count', 'min', 'max'])
+
+                                   # Appliquer le groupement et l'agrégation
+if group_column and aggregation_function:
+    aggregated_data = group_data(data, group_column, aggregation_function)
+    st.write(f"Données groupées par {group_column} avec {aggregation_function} :")
+    st.dataframe(aggregated_data)
+
+                                   # Affichage des données brutes
+st.write("Voici les données brutes:")
+st.dataframe(data.head())
+
 
 
 
