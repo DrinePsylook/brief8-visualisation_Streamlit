@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-from utils import load_data, filter_data, category, slider_price, advanced_filter, col_numeric, convert_xlsx, agg_sum,agg_mean, agg_min, agg_max, agg_all, col_string, concat_data, concat_count
+from utils import load_data, order_data, category, slider_price, advanced_filter, col_numeric, convert_xlsx, agg_sum,agg_mean, agg_min, agg_max, agg_all, col_string, concat_data, concat_count
 
 st.set_page_config(page_title="Visualisation avec Streamlit",
     page_icon="🧊",
@@ -9,25 +9,30 @@ st.set_page_config(page_title="Visualisation avec Streamlit",
 
 st.sidebar.title("Filtres")
 
-st.title("Tableau : prix des voitures")
+st.title("Data : vente de voitures")
 
 #état du téléchargement s'il est trop long
 data_load_state = st.text('Loading data...')
 
 # appel de la fonction load_data, affichage des données limitées aux 100 premières entrées
-data = load_data(100)
+data = load_data(1000)
+
 
 # choix des colonnes à affficher avec un selectbox :
-option = st.sidebar.selectbox("Choisissez votre colonne", (data.columns), placeholder="Selectionnez votre filtre...",)
+option = st.sidebar.selectbox("Choisissez votre colonne", 
+                              (data.columns), 
+                              placeholder="Selectionnez votre filtre...",)
 # filtre croissant, décroissant avec des boutons radio
-ordre = st.sidebar.radio("Quel ordre ?", key="visibility", options = ["croissant", "décroissant"])
+ordre = st.sidebar.radio("Quel ordre ?", 
+                         key="visibility", 
+                         options = ["croissant", "décroissant"])
 
 data_load_state.text('Loading data...done!')
 
 
 if option :
     # appel de la fonction filter_data pour l'affichage des données triées par colonne avec le selectbox
-    data = filter_data(data, option, ordre)
+    data = order_data(data, option, ordre)
     #appel de la fonction de filtre avancé
     filterPlus = advanced_filter(data, option)
     # print(filterPlus)
@@ -50,7 +55,6 @@ select_category = st.sidebar.multiselect(
     default = None,
     placeholder = "Marques de voiture"
 )
-#st.write(select_category)
 
 # appel de la fonction category pour l'affichage des données liées au model de voiture
 data = category(data, 'model', select_category)
@@ -110,35 +114,38 @@ with col1a:
 with col2a:
     button_concat_count = st.button("Count")
 
-#création du bouton sum
+#appel de la fonction sum
 if button_sum:
     data_sum = agg_sum(data, option, select_col_agg)
     st.write(data_sum)
 
-#création du bouton mean
+#appel de la fonction mean
 if button_mean:
     data_mean = agg_mean(data, option, select_col_agg)
     st.write(data_mean)
 
-#création du bouton min
+#appel de la fonction min
 if button_min:
     data_min = agg_min(data, option, select_col_agg)
     st.write(data_min)
 
-#création du bouton max
+#appel de la fonction max
 if button_max:
     data_max = agg_max(data, option, select_col_agg)
     st.write(data_max)
 
+#appel de toutes les fonctions agrégation numériques
 if button_all:
     data_all_agg = agg_all(data, option, select_col_agg)
     for all_aggregated_data, df in data_all_agg.items():
         st.write(df)
 
+#appel de la fonction agg textuelle
 if button_concat:
     data_concat = concat_data(data, option, select_col_txt)
     st.dataframe(data=data_concat, use_container_width= True, on_select="rerun")
 
+#appel de la fonction agg textuelle count
 if button_concat_count:
     data_count = concat_count(data, option, select_col_txt)
     st.dataframe(data=data_count, use_container_width= True, on_select="rerun")

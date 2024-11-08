@@ -13,7 +13,7 @@ def load_data(nrows) :
     data.rename(lowercase, axis='columns', inplace=True)
     return data
 
-def filter_data(data, col, order):
+def order_data(data, col, order):
     asc = None
     if order == "croissant":
         asc = True
@@ -81,14 +81,7 @@ def col_string(data):
         if col_type == 'object':
             col_str.append(col_name)
     return col_str
-            
-def convert_xlsx(data):
-    buffer = io.BytesIO()
-    writer = pd.ExcelWriter(buffer, engine="xlsxwriter")
-    data.to_excel(writer, index=False, sheet_name="sheet1")
-    writer.close()
-    data_bytes = buffer.getvalue() 
-    return data_bytes
+        
  
 def agg_sum(data, col1, col2):
     sum_data = data.groupby(col1)[col2].sum()
@@ -124,8 +117,16 @@ def concat_data(data, col1, col2):
 
 def concat_count(data, col1, col2):
     total = data.groupby([col1], as_index = False).agg({col2: [', '.join, 'unique', 'count']})
-    total.columns = [col1, f"{col2}_joined", f"{col2}_unique", f"{col2}_count"]
-    new_col2 = total[col2].unique.apply(lambda x: str(x).replace("['", "").replace("']", ""))
-    print("new_col = ", total[col2].count)
-    new_data = total[[col1, f"{col2}_joined", new_col2, f"{col2}_count"]]
+    # total.columns = [col1, f"{col2}_joined", f"{col2}_unique", f"{col2}_count"]
+    # new_col2 = total[col2].unique.apply(lambda x: str(x).replace("['", "").replace("']", ""))
+    # print("new_col = ", total[col2].count)
+    # new_data = total[[col1, f"{col2}_joined", new_col2, f"{col2}_count"]]
     return total
+
+def convert_xlsx(data):
+    buffer = io.BytesIO()
+    writer = pd.ExcelWriter(buffer, engine="xlsxwriter")
+    data.to_excel(writer, index=False, sheet_name="sheet1")
+    writer.close()
+    data_bytes = buffer.getvalue() 
+    return data_bytes
