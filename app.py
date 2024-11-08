@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-from utils import load_data, filter_data, category, slider_price, advanced_filter, col_numeric, convert_xlsx, agg_sum,agg_mean, agg_min, agg_max
+from utils import load_data, filter_data, category, slider_price, advanced_filter, col_numeric, convert_xlsx, agg_sum,agg_mean, agg_min, agg_max, agg_all, col_string, concat_data, concat_count
 
 st.set_page_config(page_title="Visualisation avec Streamlit",
     page_icon="🧊",
@@ -30,12 +30,14 @@ if option :
     data = filter_data(data, option, ordre)
     #appel de la fonction de filtre avancé
     filterPlus = advanced_filter(data, option)
-    #print(filterPlus)
+    # print(filterPlus)
     if filterPlus:
         if isinstance(filterPlus, list) :
             data = category(data, option, filterPlus)
         elif isinstance(filterPlus, tuple) and len(filterPlus) == 2 :
             data = slider_price(data, option, filterPlus)
+        else:
+            data = category(data, 'salemonth', filterPlus)
 
 
 # transformation de la colonne model d'Object à Category
@@ -73,10 +75,10 @@ st.sidebar.divider()
 col_num = col_numeric(data)
 
 select_col_agg = st.sidebar.multiselect(
-    "Choisissez les colonnes à aggréger :",
+    "Choisissez les colonnes numériques à agréger :",
     col_num,
     default = None,
-    placeholder = "Les colonnes à aggréger"
+    placeholder = "Les colonnes numériques à agréger"
 )
 
 
@@ -84,10 +86,29 @@ col1, col2 = st.sidebar.columns(2)
 with col1:
     button_sum = st.button("Somme")
     button_min = st.button("Minimum")
-
+    button_all = st.button("All agg")
+    
 with col2:
     button_mean = st.button("Moyenne")
     button_max = st.button("Maximum")
+
+
+col_str = col_string(data)
+
+select_col_txt = st.sidebar.selectbox(
+    "Choisissez les colonnes textuelles à agréger :",
+    col_str,
+    placeholder = "Les colonnes textuelles  à agréger"
+)
+
+col1a, col2a = st.sidebar.columns(2)
+
+with col1a:
+    button_concat = st.button("Jointure")
+    button_reset = st.button("Reset")
+
+with col2a:
+    button_concat_count = st.button("Count")
 
 #création du bouton sum
 if button_sum:
@@ -109,8 +130,21 @@ if button_max:
     data_max = agg_max(data, option, select_col_agg)
     st.write(data_max)
 
+if button_all:
+    data_all_agg = agg_all(data, option, select_col_agg)
+    for all_aggregated_data, df in data_all_agg.items():
+        st.write(df)
+
+if button_concat:
+    data_concat = concat_data(data, option, select_col_txt)
+    st.dataframe(data=data_concat, use_container_width= True, on_select="rerun")
+
+if button_concat_count:
+    data_count = concat_count(data, option, select_col_txt)
+    st.dataframe(data=data_count, use_container_width= True, on_select="rerun")
+
 #création du bouton reset
-if st.sidebar.button("Reset"):
+if button_reset:
     data = load_data(100)
 
 
