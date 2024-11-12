@@ -1,8 +1,11 @@
+import pytest
 import streamlit as st
 import pandas as pd
 import numpy as np
 from io import BytesIO
+#from car_data_analise import load_data,data_tri,catogor,filter_numeric_column,
 
+@pytest.fixture
 def load_data(nrows):           # Charger les données
     data = pd.read_csv("car_prices_clean.csv", nrows=nrows)
     lowercase = lambda x: str(x).lower()
@@ -14,8 +17,8 @@ def data_tri(table,colonne,sort_order):    # Trier les données
         
         if sort_order == 'Ascendant':
             data_sorted= pd.DataFrame(table).sort_values(by=colonne, ascending=True)
-        else:
-            data_sorted = pd.DataFrame(table).sort_values(by=colonne, ascending=False)
+        else:c
+    data_sorted = pd.DataFrame(table).sort_values(by=colonne, ascending=False)
     
     return data_sorted
 
@@ -74,7 +77,6 @@ def download_excel(data):     # Fonction pour télécharger
         file_name="filtered_data.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
-
 
     excel_file.seek(0) # Revenir au début du fichier Excel en mémoire
 
@@ -187,10 +189,10 @@ data = load_data(100)
                                     
 st.title("Analyse des Données des Voitures")   # Titre de l'application
 
-                                        # Sélection de la colonne pour le groupement
+                                    # Sélection de la colonne pour le groupement
 group_column = st.selectbox("Choisir une colonne pour le groupement", data.columns)
 
-                                      # Sélection de la fonction d'agrégation
+                                    # Sélection de la fonction d'agrégation
 aggregation_function = st.selectbox("Choisir une fonction d'agrégation", 
                                    ['mean', 'sum', 'count', 'min', 'max'])
 
