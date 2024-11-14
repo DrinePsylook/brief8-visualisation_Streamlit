@@ -22,13 +22,13 @@ def order_data(data, col, order):
     if col:
         tbl_filter = pd.DataFrame(data).sort_values(by=col, ascending=asc)
     return tbl_filter
-
 def category(tbl, col, cat):
     if cat : 
         new_data = tbl[tbl[col].isin(cat)]
     else:
         new_data = tbl
     return new_data
+
 
 def slider_price(tbl, col, values) :
     if values and len(values) == 2: 
