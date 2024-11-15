@@ -63,12 +63,11 @@ def test_slider_price():
     result = slider_price(df, col="Price", values=[300])
     expected = df.reset_index(drop=True)  
 
-    # valeur = None
     result = slider_price(df, col="Price", values=[100, 200, 300, 400, 500])
-    print(result)
+    #print(result)
     min_value =int(min(df["Price"]))
     max_value =int(max(df["Price"]))
     expected = df[df["Price"].between(min_value, max_value)]
-    print(expected)
+    #print(expected)
     pd.testing.assert_frame_equal(result, expected)
    
