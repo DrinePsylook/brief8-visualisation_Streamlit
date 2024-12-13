@@ -1,5 +1,6 @@
-*.zone.identifier
+*.Zone.Identifier
 *.csv
+*.code-workspace
 
 
 # Byte-compiled / optimized / DLL files
