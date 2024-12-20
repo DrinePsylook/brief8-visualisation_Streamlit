@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import io
+import pickle
+import sklearn
 from datetime import datetime, date
 
 DATA_CSV = ('car_prices_clean.csv')
@@ -130,3 +132,23 @@ def convert_xlsx(data):
     writer.close()
     data_bytes = buffer.getvalue() 
     return data_bytes
+
+@st.cache_data
+def load_model():
+    """
+    Load model from pickle file
+
+    Args:
+        None
+    
+    Returns:
+        picle: loaded model
+    """
+    with open('models/model.pickle', 'rb') as f:
+        model = pickle.load(f)
+    with open('models/config.pickle', 'rb') as f:
+        data_params = pickle.load(f)
+    with open('models/pipeline.pickle', 'rb') as f:
+        data_pipeline = pickle.load(f)
+    return model, data_params, data_pipeline
+

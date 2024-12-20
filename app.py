@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-from utils import load_data, order_data, category, slider_price, advanced_filter, col_numeric, convert_xlsx, agg_sum,agg_mean, agg_min, agg_max, agg_all, col_string, concat_data, concat_count
+from utils import load_data, order_data, category, slider_price, advanced_filter, col_numeric, convert_xlsx, agg_sum,agg_mean, agg_min, agg_max, agg_all, col_string, concat_data, concat_count, load_model
 
 st.set_page_config(page_title="Visualisation avec Streamlit",
     page_icon="🧊",
@@ -27,7 +27,7 @@ ordre = st.sidebar.radio("Quel ordre ?",
                          key="visibility", 
                          options = ["croissant", "décroissant"])
 
-data_load_state.text('Loading data...done!')
+#data_load_state.text('Loading data...done!')
 
 
 if option :
@@ -154,14 +154,58 @@ if button_concat_count:
 if button_reset:
     data = load_data(100)
 
+with st.form("my form"):
+    model, data_params, pipeline = load_model()
+    car_maker = st.selectbox(
+        "Constructeur de voiture",
+        data_params["constructeur"],
+        index=None,
+        placeholder="Choisir un constructeur de voiture"
+    )
+    car_model = st.selectbox(
+        "Modèle de voiture",
+        data_params["modèle"],
+        index=None,
+        placeholder="Choisir un modèle de voiture"
+    )
+    car_type = st.selectbox(
+        "Type de voiture",
+        data_params["type"],
+        index=None,
+        placeholder="Choisir un type de voiture"
+    )
+    odometer_min, odometer_max = data_params['compteur kilométrique']
+    car_odometer = st.slider("Choisir les km", odometer_min, odometer_max, 1)
+
+    condition_min, condition_max = data_params['condition']
+    car_condition = st.slider("Choisir l'état de la voiture", condition_min, condition_max, 1)
+
+    year_min, year_max = data_params['année']
+    car_year = st.slider("Choisir l'année de construction", year_min+1990, year_max+1990, 1)
+
+    submitted = st.form_submit_button("Envoyer")
+    if submitted:
+        car_year -= 1990
+        st.write([car_year, car_maker, car_model, car_type, car_condition, car_odometer])
+        data = [car_year, car_maker, car_model, car_type, car_condition, car_odometer]
+        df = pd.DataFrame(columns=['année', 'constructeur', 'modèle', 'type', 'condition', 'compteur kilométrique'], index=[0])
+        df.loc[0]=data
+        processed_data = pipeline.transform(df)
+        preds = model.predict(processed_data)
+        st.write(preds)
+
+st.write("Outside the form")
 
 st.dataframe(data=data, use_container_width= True, on_select="rerun")
 
-#conversion du data filtré
-xlsx_file = convert_xlsx(data)
+if isinstance(data, pd.DataFrame): 
+    #conversion du data filtré
+    xlsx_file = convert_xlsx(data)
 
-#bouton permettant le téléchargement au format excel
-st.download_button("Download xlsx", 
-          data=xlsx_file,
-          file_name=f"car_prices-{option}.xlsx",
-          mime="application/vnd.ms-excel")
+    #bouton permettant le téléchargement au format excel
+    st.download_button("Download xlsx", 
+            data=xlsx_file,
+            file_name=f"car_prices-{option}.xlsx",
+            mime="application/vnd.ms-excel")
+else:
+    st.warning("The data is not a DataFrame. Cannot export to Excel.")
