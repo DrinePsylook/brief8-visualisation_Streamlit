@@ -175,22 +175,23 @@ with st.form("my form"):
         placeholder="Choisir un type de voiture"
     )
     odometer_min, odometer_max = data_params['compteur kilométrique']
-    car_odometer = st.slider("Choisir les km", odometer_min, odometer_max, 1)
+    car_odometer = st.slider("Choisir les km", odometer_min, odometer_max)
 
     condition_min, condition_max = data_params['condition']
-    car_condition = st.slider("Choisir l'état de la voiture", condition_min, condition_max, 1)
+    car_condition = st.slider("Choisir l'état de la voiture", condition_min, condition_max)
 
     year_min, year_max = data_params['année']
-    car_year = st.slider("Choisir l'année de construction", year_min+1990, year_max+1990, 1)
+    car_year = st.slider("Choisir l'année de construction", year_min+1990, year_max+1990)
+    print("year_min = ", year_min)
 
     submitted = st.form_submit_button("Envoyer")
     if submitted:
-        car_year -= 1990
+        #car_year -= 1990
         st.write([car_year, car_maker, car_model, car_type, car_condition, car_odometer])
-        data = [car_year, car_maker, car_model, car_type, car_condition, car_odometer]
-        df = pd.DataFrame(columns=['année', 'constructeur', 'modèle', 'type', 'condition', 'compteur kilométrique'], index=[0])
-        df.loc[0]=data
-        processed_data = pipeline.transform(df)
+        data_car = [car_year, car_maker, car_model, car_type, car_condition, car_odometer]
+        data = pd.DataFrame(columns=['année', 'constructeur', 'modèle', 'type', 'condition', 'compteur kilométrique'], index=[0])
+        data.loc[0]=data_car
+        processed_data = pipeline.transform(data)
         preds = model.predict(processed_data)
         st.write(preds)
 
